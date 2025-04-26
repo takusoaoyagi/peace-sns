@@ -21,11 +21,10 @@ function loadPosts() {
     return JSON.parse(saved);
   } else {
     // 初回ロード時は defaultPosts を保存しておく
-    localStorage.setItem('posts', JSON.stringify(defaultPosts));
+    savePosts(defaultPosts);
     return defaultPosts;
   }
 }
-
 
 // 3. localStorage に書き出す関数
 function savePosts(posts) {
@@ -44,3 +43,28 @@ function addPost(post, save = true) {
     <p class="post-time">${post.time}</p>
     <p class="post-content">${post.content}</p>
   `;
+  timeline.prepend(article);
+
+  if (save) {
+    posts.unshift(post);      // 配列の先頭に追加
+    savePosts(posts);         // localStorage に保存
+  }
+}
+
+// 5. ページロード時に実行
+document.addEventListener('DOMContentLoaded', () => {
+  posts = loadPosts();                         // 保存データ or デフォルト
+  posts.forEach(post => addPost(post, false)); // false で再保存させない
+
+  // フォーム送信処理
+  const form = document.getElementById('post-form');
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const userInput = document.getElementById('post-user').value;
+    const contentInput = document.getElementById('post-content-input').value;
+    const now = new Date();
+    const timestamp = now.toISOString().slice(0,16).replace('T',' ');
+    addPost({ user: userInput, time: timestamp, content: contentInput });
+    form.reset();
+  });
+});
