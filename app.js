@@ -1,17 +1,16 @@
 // app.js
 
+// 0. ダミーAIフィルタ関数
+async function aiFilter(text) {
+  await new Promise(r => setTimeout(r, 500));
+  return text + ' （AIチェック済♡）';
+}
+
 // 1. 初期サンプル投稿
 const defaultPosts = [
   { user: '匿名', time: '2025-04-27 15:00', content: 'マジ最高の1日だった〜🌈💖' },
   { user: '匿名', time: '2025-04-27 14:30', content: 'おやつタイムがサイコー🍪✨' }
 ];
-
-// 0. ダミーAIフィルタ関数（ここが“フェイクAPI”）
-async function aiFilter(text) {
-  // 500ms 待って「AIチェック済」風に書き換え
-  await new Promise(r => setTimeout(r, 500));
-  return text + ' （AIチェック済♡）';
-}
 
 // キャラ → 表示名マップ
 const charMap = {
@@ -21,18 +20,26 @@ const charMap = {
   nerd: '🤓 オタクくん'
 };
 
+// 2. localStorage から読み込む
 function loadPosts() {
   const saved = localStorage.getItem('posts');
-  if (saved) return JSON.parse(saved);
-  savePosts(defaultPosts);
-  return defaultPosts;
+  if (saved) {
+    return JSON.parse(saved);
+  } else {
+    savePosts(defaultPosts);
+    return defaultPosts;
+  }
 }
+
+// 3. localStorage に保存
 function savePosts(posts) {
   localStorage.setItem('posts', JSON.stringify(posts));
 }
 
+// 投稿リスト格納用
 let posts = [];
 
+// 4. 投稿を画面に追加＆必要なら保存
 function addPost(post, save = true) {
   const selectedChar = localStorage.getItem('selectedChar') || 'gal';
   const displayUser = `${charMap[selectedChar]} ${post.user}`;
@@ -45,14 +52,16 @@ function addPost(post, save = true) {
     <p class="post-content">${post.content}</p>
   `;
   timeline.prepend(article);
+
   if (save) {
     posts.unshift(post);
     savePosts(posts);
   }
 }
 
+// 5. ページ読み込み時の処理
 document.addEventListener('DOMContentLoaded', () => {
-  // キャラ選択の初期設定
+  // キャラ選択の初期化
   const charSelect = document.getElementById('char-select');
   const savedChar = localStorage.getItem('selectedChar') || 'gal';
   charSelect.value = savedChar;
@@ -60,24 +69,24 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('selectedChar', charSelect.value);
   });
 
-  // 投稿ロード
+  // 投稿を読み込んで画面表示
   posts = loadPosts();
   posts.forEach(p => addPost(p, false));
 
-  // フォーム送信
-form.addEventListener('submit', async e => {
-  e.preventDefault();
-  const userInput = document.getElementById('post-user').value || '匿名';
-  const contentInput = document.getElementById('post-content-input').value;
+  // フォーム送信時
+  const form = document.getElementById('post-form');
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const userInput = document.getElementById('post-user').value || '匿名';
+    const contentInput = document.getElementById('post-content-input').value;
 
-  // ① ダミーAIフィルタに投げて書き換え結果を受け取る
-  const filteredContent = await aiFilter(contentInput);
+    // ダミーAIフィルタを通す
+    const filteredContent = await aiFilter(contentInput);
 
-  const now = new Date();
-  const timestamp = now.toISOString().slice(0,16).replace('T',' ');
+    const now = new Date();
+    const timestamp = now.toISOString().slice(0,16).replace('T',' ');
 
-  // ② フィルタ後のテキストで投稿を追加
-  addPost({ user: userInput, time: timestamp, content: filteredContent });
-  form.reset();
+    addPost({ user: userInput, time: timestamp, content: filteredContent });
+    form.reset();
+  });
 });
-
