@@ -22,13 +22,14 @@ const defaultPosts = [
   { user: '匿名', time: '2025-04-27 14:30', content: 'おやつタイムがサイコー🍪✨' }
 ];
 
-// キャラ → 表示名マップ
+// キャラクターと絵文字の対応表（絵文字だけにしました）
 const charMap = {
-  gal: '👧 高校生ギャルちゃん',
-  samurai: '🗡️ 侍くん',
-  ojou: '👸 お嬢様',
-  nerd: '🤓 オタクくん'
+  gal: '👧',
+  ojou: '👸',
+  nerd: '🤓',
+  samurai: '⚔️'
 };
+
 
 // 2. localStorage から読み込む
 function loadPosts() {
@@ -52,7 +53,8 @@ let posts = [];
 // 4. 投稿を画面に追加＆必要なら保存
 function addPost(post, save = true) {
   const selectedChar = localStorage.getItem('selectedChar') || 'gal';
-  const displayUser = `${charMap[selectedChar]} ${post.user}`;
+// 画面に表示するときのユーザー名（絵文字＋本名）
+const displayUser = `${charMap[selectedChar] || ''}${post.user}`;
   const timeline = document.getElementById('timeline');
   const article = document.createElement('article');
   article.className = 'post';
