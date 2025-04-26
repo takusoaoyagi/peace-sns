@@ -47,3 +47,28 @@ header {
   margin: 8px 0 0;
   line-height: 1.5;
 }
+
+/* 投稿フォームデザイン */
+#post-form {
+  max-width: 600px;
+  margin: 16px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#post-form input,
+#post-form textarea {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+}
+#post-form button {
+  align-self: flex-end;
+  padding: 8px 12px;
+  background-color: #4ea6ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
