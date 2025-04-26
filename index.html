@@ -40,29 +40,29 @@
   <!-- タイムラインここまで -->
 <hr>
 
-  <!-- あとで JavaScript/CSS を読み込む準備 -->
-  <link rel="stylesheet" href="styles.css">
+  <!-- ── ここから Firebase 初期化 ── -->
   <script type="module">
-    
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+    // 1) Firebase コア SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    // 2) Realtime Database SDK
+    import { getDatabase } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyBaRYrs7n_JoPJtt9rZ01Gl2KQ8DvNhd3k",
-    authDomain: "peace-sns.firebaseapp.com",
-    databaseURL: "https://peace-sns-default-rtdb.firebaseio.com",
-    projectId: "peace-sns",
-    storageBucket: "peace-sns.firebasestorage.app",
-    messagingSenderId: "787581748298",
-    appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
-  };
+    // 3) あなたの Firebase プロジェクト設定
+    const firebaseConfig = {
+      apiKey: "AIzaSyBaRYrs7n_JoPJtt9rZ01GI2KQ8DvNhd3k",
+      authDomain: "peace-sns.firebaseapp.com",
+      databaseURL: "https://peace-sns-default-rtdb.firebaseio.com",
+      projectId: "peace-sns",
+      storageBucket: "peace-sns.appspot.com",
+      messagingSenderId: "787581748298",
+      appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
+    };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-</script>
+    // 4) Firebase 初期化＆dbオブジェクトを用意
+    const appFB = initializeApp(firebaseConfig);
+    const db = getDatabase(appFB);
+  </script>
+  <!-- ── ここまで Firebase 初期化 ── -->
   <script src="app.js" defer></script>
 </body>
 
