@@ -42,6 +42,27 @@
 
   <!-- あとで JavaScript/CSS を読み込む準備 -->
   <link rel="stylesheet" href="styles.css">
+  <script type="module">
+    
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyBaRYrs7n_JoPJtt9rZ01Gl2KQ8DvNhd3k",
+    authDomain: "peace-sns.firebaseapp.com",
+    databaseURL: "https://peace-sns-default-rtdb.firebaseio.com",
+    projectId: "peace-sns",
+    storageBucket: "peace-sns.firebasestorage.app",
+    messagingSenderId: "787581748298",
+    appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
   <script src="app.js" defer></script>
 </body>
 
