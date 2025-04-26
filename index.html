@@ -3,32 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <title>Peace SNS MVP</title>
-    <link rel="stylesheet" href="styles.css">
-
+  <!-- ── ここからスタイル読み込み ── -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- ── ここまで ── -->
 </head>
-
 
 <body>
   <header>
     <h1>ようこそ Peace SNS へ！</h1>
   </header>
-    <!-- 投稿フォーム -->
+
+  <!-- 投稿フォーム -->
   <form id="post-form">
-    <!-- キャラ選択 -->
-<label for="char-select">キャラ：</label>
-<select id="char-select">
-  <option value="gal">ギャル👧</option>
-  <option value="samurai">侍🗡️</option>
-  <option value="ojou">お嬢様👸</option>
-  <option value="nerd">オタク🤓</option>
-</select>
+    <label for="char-select">キャラ：</label>
+    <select id="char-select">
+      <option value="gal">ギャル👧</option>
+      <option value="samurai">侍🗡️</option>
+      <option value="ojou">お嬢様👸</option>
+      <option value="nerd">オタク🤓</option>
+    </select>
     <input type="text" id="post-user" placeholder="あなたの名前" required>
     <textarea id="post-content-input" placeholder="投稿内容を入力…" rows="3" required></textarea>
     <button type="submit">投稿する</button>
   </form>
-  <!-- ここからタイムライン -->
+
+  <!-- タイムライン -->
   <section id="timeline">
-    <!-- サンプル投稿 -->
     <article class="post">
       <h2 class="post-user">👧 高校生ギャルちゃん</h2>
       <p class="post-time">2025-04-27 15:00</p>
@@ -37,31 +37,29 @@
         みんなも今日のハッピー教えてほしいな〜！
       </p>
     </article>
-    <!-- ここに投稿がどんどん増えていくイメージ -->
   </section>
-  <!-- タイムラインここまで -->
-<hr>
+  <hr>
 
-<!-- index.html の <head> → <body> のあいだに置いている module スクリプト -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getDatabase }  from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+  <!-- ── Firebase 初期化（モジュール＆defer） ── -->
+  <script type="module" defer>
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getDatabase }  from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSy…",
-    authDomain: "peace-sns.firebaseapp.com",
-    databaseURL: "https://peace-sns-default-rtdb.firebaseio.com",
-    projectId: "peace-sns",
-    storageBucket: "peace-sns.appspot.com",
-    messagingSenderId: "787581748298",
-    appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
-  };
-  const appFB = initializeApp(firebaseConfig);
-  // グローバルに露出させる
-  window.db = getDatabase(appFB);
-</script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBaRYrs7n_JoPJtt9rZ01Gl2KQ8DvNhd3k",
+      authDomain: "peace-sns.firebaseapp.com",
+      databaseURL: "https://peace-sns-default-rtdb.firebaseio.com",
+      projectId: "peace-sns",
+      storageBucket: "peace-sns.appspot.com",
+      messagingSenderId: "787581748298",
+      appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
+    };
+    const appFB = initializeApp(firebaseConfig);
+    // これで app.js から「db」が使えるようになります
+    window.db = getDatabase(appFB);
+  </script>
 
+  <!-- ── アプリ本体スクリプト ── -->
   <script src="app.js" defer></script>
 </body>
-
 </html>
