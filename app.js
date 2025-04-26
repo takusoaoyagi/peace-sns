@@ -17,8 +17,15 @@ const defaultPosts = [
 // 2. localStorage から読み込む関数
 function loadPosts() {
   const saved = localStorage.getItem('posts');
-  return saved ? JSON.parse(saved) : defaultPosts;
+  if (saved) {
+    return JSON.parse(saved);
+  } else {
+    // 初回ロード時は defaultPosts を保存しておく
+    localStorage.setItem('posts', JSON.stringify(defaultPosts));
+    return defaultPosts;
+  }
 }
+
 
 // 3. localStorage に書き出す関数
 function savePosts(posts) {
