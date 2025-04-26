@@ -42,29 +42,25 @@
   <!-- タイムラインここまで -->
 <hr>
 
-  <!-- ── ここから Firebase 初期化 ── -->
-  <script type="module">
-    // 1) Firebase コア SDK
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    // 2) Realtime Database SDK
-    import { getDatabase } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+<!-- index.html の <head> → <body> のあいだに置いている module スクリプト -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getDatabase }  from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-    // 3) あなたの Firebase プロジェクト設定
-    const firebaseConfig = {
-      apiKey: "AIzaSyBaRYrs7n_JoPJtt9rZ01GI2KQ8DvNhd3k",
-      authDomain: "peace-sns.firebaseapp.com",
-      databaseURL: "https://peace-sns-default-rtdb.firebaseio.com",
-      projectId: "peace-sns",
-      storageBucket: "peace-sns.appspot.com",
-      messagingSenderId: "787581748298",
-      appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSy…",
+    authDomain: "peace-sns.firebaseapp.com",
+    databaseURL: "https://peace-sns-default-rtdb.firebaseio.com",
+    projectId: "peace-sns",
+    storageBucket: "peace-sns.appspot.com",
+    messagingSenderId: "787581748298",
+    appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
+  };
+  const appFB = initializeApp(firebaseConfig);
+  // グローバルに露出させる
+  window.db = getDatabase(appFB);
+</script>
 
-    // 4) Firebase 初期化＆dbオブジェクトを用意
-    const appFB = initializeApp(firebaseConfig);
-    const db = getDatabase(appFB);
-  </script>
-  <!-- ── ここまで Firebase 初期化 ── -->
   <script src="app.js" defer></script>
 </body>
 
