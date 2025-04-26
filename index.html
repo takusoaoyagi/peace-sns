@@ -12,6 +12,14 @@
   </header>
     <!-- 投稿フォーム -->
   <form id="post-form">
+    <!-- キャラ選択 -->
+<label for="char-select">キャラ：</label>
+<select id="char-select">
+  <option value="gal">ギャル👧</option>
+  <option value="samurai">侍🗡️</option>
+  <option value="ojou">お嬢様👸</option>
+  <option value="nerd">オタク🤓</option>
+</select>
     <input type="text" id="post-user" placeholder="あなたの名前" required>
     <textarea id="post-content-input" placeholder="投稿内容を入力…" rows="3" required></textarea>
     <button type="submit">投稿する</button>
