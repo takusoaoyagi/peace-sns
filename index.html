@@ -41,23 +41,27 @@
   <hr>
 
   <!-- ── Firebase 初期化（モジュール＆defer） ── -->
-  <script type="module" defer>
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getDatabase }  from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+<script type="module" defer>
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getDatabase, ref, onChildAdded, push } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBaRYrs7n_JoPJtt9rZ01Gl2KQ8DvNhd3k",
-      authDomain: "peace-sns.firebaseapp.com",
-      databaseURL: "https://peace-sns-default-rtdb.firebaseio.com",
-      projectId: "peace-sns",
-      storageBucket: "peace-sns.appspot.com",
-      messagingSenderId: "787581748298",
-      appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
-    };
-    const appFB = initializeApp(firebaseConfig);
-    // これで app.js から「db」が使えるようになります
-    window.db = getDatabase(appFB);
-  </script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBaRYrs7n_JoPJtt9rZ01Gl2KQ8DvNhd3k",
+    authDomain: "peace-sns.firebaseapp.com",
+    databaseURL: "https://peace-sns-default-rtdb.firebaseio.com",
+    projectId: "peace-sns",
+    storageBucket: "peace-sns.appspot.com",
+    messagingSenderId: "787581748298",
+    appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
+  };
+
+  const appFB = initializeApp(firebaseConfig);
+  window.db = getDatabase(appFB);
+  window.firebaseRef = ref;
+  window.firebaseOnChildAdded = onChildAdded;
+  window.firebasePush = push;
+</script>
+
 
   <!-- ── アプリ本体スクリプト ── -->
   <script src="app.js" defer></script>
