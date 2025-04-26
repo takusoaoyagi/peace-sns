@@ -83,3 +83,19 @@ header {
 #post-form button:hover {
   background-color: #ff85c1;
 }
+
+/* キャラ選択ドロップダウン */
+#char-select {
+  padding: 6px 8px;
+  border: 2px solid #FFB6C1;
+  border-radius: 6px;
+  font-size: 1em;
+  background: #fff;
+  margin-bottom: 8px;
+}
+
+#post-form label[for="char-select"] {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #FF69B4;
+}
