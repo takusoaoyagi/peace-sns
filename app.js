@@ -6,6 +6,13 @@ const defaultPosts = [
   { user: '匿名', time: '2025-04-27 14:30', content: 'おやつタイムがサイコー🍪✨' }
 ];
 
+// 0. ダミーAIフィルタ関数（ここが“フェイクAPI”）
+async function aiFilter(text) {
+  // 500ms 待って「AIチェック済」風に書き換え
+  await new Promise(r => setTimeout(r, 500));
+  return text + ' （AIチェック済♡）';
+}
+
 // キャラ → 表示名マップ
 const charMap = {
   gal: '👧 高校生ギャルちゃん',
@@ -58,14 +65,19 @@ document.addEventListener('DOMContentLoaded', () => {
   posts.forEach(p => addPost(p, false));
 
   // フォーム送信
-  const form = document.getElementById('post-form');
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const userInput = document.getElementById('post-user').value || '匿名';
-    const contentInput = document.getElementById('post-content-input').value;
-    const now = new Date();
-    const timestamp = now.toISOString().slice(0,16).replace('T',' ');
-    addPost({ user: userInput, time: timestamp, content: contentInput });
-    form.reset();
-  });
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const userInput = document.getElementById('post-user').value || '匿名';
+  const contentInput = document.getElementById('post-content-input').value;
+
+  // ① ダミーAIフィルタに投げて書き換え結果を受け取る
+  const filteredContent = await aiFilter(contentInput);
+
+  const now = new Date();
+  const timestamp = now.toISOString().slice(0,16).replace('T',' ');
+
+  // ② フィルタ後のテキストで投稿を追加
+  addPost({ user: userInput, time: timestamp, content: filteredContent });
+  form.reset();
 });
+
