@@ -1,66 +1,67 @@
 // app.js
 
-// 1. 初期サンプル投稿（localStorage になければこれを使う）
+// 1. 初期サンプル投稿
 const defaultPosts = [
-  {
-    user: '👧 高校生ギャルちゃん',
-    time: '2025-04-27 15:00',
-    content: 'マジ最高の1日だったんだけど〜🌈💖 みんなも今日のハッピー教えてほしいな〜！'
-  },
-  {
-    user: '👦 幼稚園児のおじさん',
-    time: '2025-04-27 14:30',
-    content: 'おべんきょうしたあとにおやつタイムがサイコーだよね🍪✨'
-  }
+  { user: '匿名', time: '2025-04-27 15:00', content: 'マジ最高の1日だった〜🌈💖' },
+  { user: '匿名', time: '2025-04-27 14:30', content: 'おやつタイムがサイコー🍪✨' }
 ];
 
-// 2. localStorage から読み込む関数
+// キャラ → 表示名マップ
+const charMap = {
+  gal: '👧 高校生ギャルちゃん',
+  samurai: '🗡️ 侍くん',
+  ojou: '👸 お嬢様',
+  nerd: '🤓 オタクくん'
+};
+
 function loadPosts() {
   const saved = localStorage.getItem('posts');
-  if (saved) {
-    return JSON.parse(saved);
-  } else {
-    // 初回ロード時は defaultPosts を保存しておく
-    savePosts(defaultPosts);
-    return defaultPosts;
-  }
+  if (saved) return JSON.parse(saved);
+  savePosts(defaultPosts);
+  return defaultPosts;
 }
-
-// 3. localStorage に書き出す関数
 function savePosts(posts) {
   localStorage.setItem('posts', JSON.stringify(posts));
 }
 
-// 4. 投稿を画面に追加＆配列にも追加する関数
-let posts = [];  // 現在の投稿リスト
+let posts = [];
 
 function addPost(post, save = true) {
+  const selectedChar = localStorage.getItem('selectedChar') || 'gal';
+  const displayUser = `${charMap[selectedChar]} ${post.user}`;
   const timeline = document.getElementById('timeline');
   const article = document.createElement('article');
   article.className = 'post';
   article.innerHTML = `
-    <h2 class="post-user">${post.user}</h2>
+    <h2 class="post-user">${displayUser}</h2>
     <p class="post-time">${post.time}</p>
     <p class="post-content">${post.content}</p>
   `;
   timeline.prepend(article);
-
   if (save) {
-    posts.unshift(post);      // 配列の先頭に追加
-    savePosts(posts);         // localStorage に保存
+    posts.unshift(post);
+    savePosts(posts);
   }
 }
 
-// 5. ページロード時に実行
 document.addEventListener('DOMContentLoaded', () => {
-  posts = loadPosts();                         // 保存データ or デフォルト
-  posts.forEach(post => addPost(post, false)); // false で再保存させない
+  // キャラ選択の初期設定
+  const charSelect = document.getElementById('char-select');
+  const savedChar = localStorage.getItem('selectedChar') || 'gal';
+  charSelect.value = savedChar;
+  charSelect.addEventListener('change', () => {
+    localStorage.setItem('selectedChar', charSelect.value);
+  });
 
-  // フォーム送信処理
+  // 投稿ロード
+  posts = loadPosts();
+  posts.forEach(p => addPost(p, false));
+
+  // フォーム送信
   const form = document.getElementById('post-form');
   form.addEventListener('submit', e => {
     e.preventDefault();
-    const userInput = document.getElementById('post-user').value;
+    const userInput = document.getElementById('post-user').value || '匿名';
     const contentInput = document.getElementById('post-content-input').value;
     const now = new Date();
     const timestamp = now.toISOString().slice(0,16).replace('T',' ');
