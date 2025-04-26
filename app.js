@@ -1,10 +1,20 @@
 // app.js
 
-// 0. ダミーAIフィルタ関数
+// 0. 本物 AIフィルタ関数
 async function aiFilter(text) {
-  await new Promise(r => setTimeout(r, 500));
-  return text + ' （AIチェック済♡）';
+  const res = await fetch(
+    "https://peace-sns-ai.takusoarts2.workers.dev/",  // ← 末尾スラッシュ付きでOK
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    }
+  );
+  const data = await res.json();
+  return data.filtered;
 }
+
+
 
 // 1. 初期サンプル投稿
 const defaultPosts = [
@@ -88,5 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addPost({ user: userInput, time: timestamp, content: filteredContent });
     form.reset();
+
+    
   });
 });
