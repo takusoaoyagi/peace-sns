@@ -1,3 +1,5 @@
+
+
 // app.js
 
 // 0. 本物 AIフィルタ関数
@@ -14,6 +16,8 @@ async function aiFilter(text) {
   return data.filtered;
 }
 
+// ── Firebase Realtime Database 参照 ──
+const postsRef = db.ref("posts");  // /posts ノードを参照
 
 
 // 1. 初期サンプル投稿
@@ -73,6 +77,16 @@ const displayUser = `${charMap[selectedChar] || ''}${post.user}`;
 
 // 5. ページ読み込み時の処理
 document.addEventListener('DOMContentLoaded', () => {
+    // ── Firebase から既存＆新着投稿をリアルタイムで受け取る ──
+  postsRef
+    .limitToLast(50)
+    .on('child_added', snapshot => {
+      const post = snapshot.val();
+      addPost(post, false);  // 画面描画のみ、DBには再保存しない
+    });
+  // posts = loadPosts();          // ← コメントアウト
+  // posts.forEach(p => addPost(p, false));  // ← コメントアウト
+
   // キャラ選択の初期化
   const charSelect = document.getElementById('char-select');
   const savedChar = localStorage.getItem('selectedChar') || 'gal';
@@ -98,7 +112,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const now = new Date();
     const timestamp = now.toISOString().slice(0,16).replace('T',' ');
 
-    addPost({ user: userInput, time: timestamp, content: filteredContent });
+    // Firebase に保存すると child_added で自動描画されます
+    postsRef.push({ user: userInput, time: timestamp, content: filteredContent });
+
     form.reset();
 
     
