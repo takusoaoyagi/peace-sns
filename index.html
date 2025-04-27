@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <title>Peace SNS MVP</title>
 
-  <!-- ここでTailwindを正しく読み込む（scriptで！！） -->
+  <!-- Tailwind読み込み -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- あとは自分のスタイル -->
+  <!-- 自分のスタイル -->
   <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -16,7 +16,7 @@
   <h1 class="text-2xl font-bold text-pink-700">ようこそ Peace SNS へ！</h1>
 </header>
 
-  <!-- ログイン／ログアウト -->
+<!-- ログイン／ログアウト -->
 <button id="login-button" class="bg-green-400 hover:bg-green-500 text-white rounded p-2 m-2">
   Googleでログインする
 </button>
@@ -25,24 +25,26 @@
   ログアウトする
 </button>
 
-  <!-- 投稿フォーム -->
-<form id="post-form" class="flex flex-col gap-2 p-4 bg-white rounded shadow max-w-md mx-auto mt-4">
-  <label for="char-select" class="text-gray-600">キャラ：</label>
-  <select id="char-select" class="border rounded p-2">
-    <option value="gal">ギャル👧</option>
-    <option value="samurai">侍🗡️</option>
-    <option value="ojou">お嬢様👸</option>
-    <option value="nerd">オタク🤓</option>
-  </select>
-  <input type="text" id="post-user" placeholder="あなたの名前" class="border rounded p-2">
-  <textarea id="post-content-input" placeholder="投稿内容を入力…" rows="3" class="border rounded p-2"></textarea>
-  <button type="submit" class="bg-pink-400 text-white rounded p-2 hover:bg-pink-500">投稿する</button>
-</form>
+<!-- 投稿フォーム（未ログイン時は非表示） -->
+<div id="post-form-wrapper" style="display:none;">
+  <form id="post-form" class="flex flex-col gap-2 p-4 bg-white rounded shadow max-w-md mx-auto mt-4">
+    <label for="char-select" class="text-gray-600">キャラ：</label>
+    <select id="char-select" class="border rounded p-2">
+      <option value="gal">ギャル👧</option>
+      <option value="samurai">侍🗡️</option>
+      <option value="ojou">お嬢様👸</option>
+      <option value="nerd">オタク🤓</option>
+    </select>
+    <input type="text" id="post-user" placeholder="あなたの名前" class="border rounded p-2">
+    <textarea id="post-content-input" placeholder="投稿内容を入力…" rows="3" class="border rounded p-2"></textarea>
+    <button type="submit" class="bg-pink-400 text-white rounded p-2 hover:bg-pink-500">投稿する</button>
+  </form>
+</div>
 
-  <!-- タイムライン（最初は空でも OK）-->
-  <section id="timeline"></section>
-  <hr>
-  
+<!-- タイムライン（最初は空でもOK）-->
+<section id="timeline"></section>
+<hr>
+
 <!-- ニックネーム登録モーダル -->
 <div id="nickname-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
   <div class="bg-white rounded-lg p-6 w-80 shadow">
@@ -55,33 +57,34 @@
     </div>
   </div>
 </div>
-  <!-- Firebase SDK（compat 版だけ！）-->
-  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database-compat.js"></script>
 
-  <!-- Firebase 初期化 -->
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBaRYrs7n_JoPJtt9rZ01Gl2KQ8DvNhd3k",
-      authDomain: "peace-sns.firebaseapp.com",
-      databaseURL: "https://peace-sns-default-rtdb.firebaseio.com",
-      projectId: "peace-sns",
-      storageBucket: "peace-sns.appspot.com",
-      messagingSenderId: "787581748298",
-      appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
-    };
+<!-- Firebase SDK（compat版）-->
+<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database-compat.js"></script>
 
-    firebase.initializeApp(firebaseConfig);
+<!-- Firebase 初期化 -->
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBaRYrs7n_JoPJtt9rZ01Gl2KQ8DvNhd3k",
+    authDomain: "peace-sns.firebaseapp.com",
+    databaseURL: "https://peace-sns-default-rtdb.firebaseio.com",
+    projectId: "peace-sns",
+    storageBucket: "peace-sns.appspot.com",
+    messagingSenderId: "787581748298",
+    appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
+  };
 
-    // グローバルに公開して app.js から使う
-    window.db                 = firebase.database();
-    window.firebaseRef        = path => firebase.database().ref(path);
-    window.firebaseOnChildAdded = (ref, cb) => ref.on('child_added', cb);
-    window.firebasePush       = (ref, val) => ref.push(val);
-  </script>
+  firebase.initializeApp(firebaseConfig);
 
-  <!-- アプリ本体 -->
-  <script src="app.js" defer></script>
+  // グローバルに公開して app.js から使う
+  window.db = firebase.database();
+  window.firebaseRef = path => firebase.database().ref(path);
+  window.firebaseOnChildAdded = (ref, cb) => ref.on('child_added', cb);
+  window.firebasePush = (ref, val) => ref.push(val);
+</script>
+
+<!-- アプリ本体 -->
+<script src="app.js" defer></script>
 </body>
 </html>
