@@ -4,87 +4,109 @@
   <meta charset="UTF-8">
   <title>Peace SNS MVP</title>
 
-  <!-- Tailwind読み込み -->
+  <!-- Tailwind → script で読み込み -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- 自分のスタイル -->
+  <!-- 必要なら追加のスタイル -->
   <link rel="stylesheet" href="styles.css">
 </head>
 
-<body>
-<header class="bg-pink-200 p-4 text-center shadow">
-  <h1 class="text-2xl font-bold text-pink-700">ようこそ Peace SNS へ！</h1>
-</header>
+<body class="bg-gray-100">
+  <!-- ヘッダー -->
+  <header class="bg-pink-200 p-4 text-center shadow">
+    <h1 class="text-2xl font-bold text-pink-700">ようこそ Peace SNS へ！</h1>
+  </header>
 
-<!-- ログイン／ログアウト -->
-<button id="login-button" class="bg-green-400 hover:bg-green-500 text-white rounded p-2 m-2">
-  Googleでログインする
-</button>
+  <!-- ログイン／ログアウト -->
+  <div class="text-center mt-4">
+    <button id="login-button"
+            class="bg-green-400 hover:bg-green-500 text-white rounded px-4 py-2 m-2">
+      Googleでログインする
+    </button>
 
-<button id="logout-button" class="hidden bg-gray-400 hover:bg-gray-500 text-white rounded p-2 m-2">
-  ログアウトする
-</button>
-  
-<!-- 投稿フォーム（未ログイン時は非表示） -->
-<div id="post-form-wrapper" style="display:none;">
-  <form id="post-form" class="flex flex-col gap-2 p-4 bg-white rounded shadow max-w-md mx-auto mt-4">
-    <label for="char-select" class="text-gray-600">キャラ：</label>
-    <select id="char-select" class="border rounded p-2">
-      <option value="gal">ギャル👧</option>
-      <option value="samurai">侍🗡️</option>
-      <option value="ojou">お嬢様👸</option>
-      <option value="nerd">オタク🤓</option>
-    </select>
-    <input type="text" id="post-user" placeholder="あなたの名前" class="border rounded p-2">
-    <textarea id="post-content-input" placeholder="投稿内容を入力…" rows="3" class="border rounded p-2"></textarea>
-    <button type="submit" class="bg-pink-400 text-white rounded p-2 hover:bg-pink-500">投稿する</button>
-  </form>
-</div>
+    <!-- ▶ style を削除して Tailwind の hidden に -->
+    <button id="logout-button"
+            class="hidden bg-gray-400 hover:bg-gray-500 text-white rounded px-4 py-2 m-2">
+      ログアウトする
+    </button>
+  </div>
 
-<!-- タイムライン（最初は空でもOK）-->
-<section id="timeline"></section>
-<hr>
+  <!-- 投稿フォーム（未ログイン時は非表示） -->
+  <div id="post-form-wrapper" style="display:none;">
+    <form id="post-form"
+          class="flex flex-col gap-2 p-4 bg-white rounded shadow max-w-md mx-auto mt-6">
 
-<!-- ニックネーム登録モーダル -->
-<div id="nickname-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-  <div class="bg-white rounded-lg p-6 w-80 shadow">
-    <h2 class="text-lg font-bold mb-4 text-center text-pink-500">ニックネーム登録</h2>
-    <input type="text" id="nickname-input" placeholder="ニックネームを入力…" class="border rounded w-full p-2 mb-4">
-    <div class="flex justify-center">
-      <button id="nickname-submit" class="bg-pink-400 text-white rounded px-4 py-2 hover:bg-pink-500">
-        登録する
+      <!-- ▶ 返信中表示エリア（リプライ機能用） -->
+      <div id="reply-info" class="hidden text-sm text-blue-500 text-center"></div>
+
+      <label for="char-select" class="text-gray-600">キャラ：</label>
+      <select id="char-select" class="border rounded p-2">
+        <option value="gal">ギャル👧</option>
+        <option value="samurai">侍🗡️</option>
+        <option value="ojou">お嬢様👸</option>
+        <option value="nerd">オタク🤓</option>
+      </select>
+
+      <input type="text" id="post-user" placeholder="あなたの名前"
+             class="border rounded p-2">
+
+      <textarea id="post-content-input" placeholder="投稿内容を入力…" rows="3"
+                class="border rounded p-2"></textarea>
+
+      <button type="submit"
+              class="bg-pink-400 text-white rounded p-2 hover:bg-pink-500">
+        投稿する
       </button>
+    </form>
+  </div>
+
+  <!-- タイムライン -->
+  <section id="timeline" class="flex flex-col gap-4 p-4 max-w-xl mx-auto mt-6"></section>
+  <hr class="max-w-xl mx-auto">
+
+  <!-- ニックネーム登録モーダル -->
+  <div id="nickname-modal"
+       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-80 shadow">
+      <h2 class="text-lg font-bold mb-4 text-center text-pink-500">ニックネーム登録</h2>
+      <input type="text" id="nickname-input" placeholder="ニックネームを入力…"
+             class="border rounded w-full p-2 mb-4">
+      <div class="flex justify-center">
+        <button id="nickname-submit"
+                class="bg-pink-400 text-white rounded px-4 py-2 hover:bg-pink-500">
+          登録する
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Firebase SDK（compat版）-->
-<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database-compat.js"></script>
+  <!-- Firebase SDK（compat 版）-->
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database-compat.js"></script>
 
-<!-- Firebase 初期化 -->
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBaRYrs7n_JoPJtt9rZ01Gl2KQ8DvNhd3k",
-    authDomain: "peace-sns.firebaseapp.com",
-    databaseURL: "https://peace-sns-default-rtdb.firebaseio.com",
-    projectId: "peace-sns",
-    storageBucket: "peace-sns.appspot.com",
-    messagingSenderId: "787581748298",
-    appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
-  };
+  <!-- Firebase 初期化 -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBaRYrs7n_JoPJtt9rZ01Gl2KQ8DvNhd3k",
+      authDomain: "peace-sns.firebaseapp.com",
+      databaseURL: "https://peace-sns-default-rtdb.firebaseio.com",
+      projectId: "peace-sns",
+      storageBucket: "peace-sns.appspot.com",
+      messagingSenderId: "787581748298",
+      appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
+    };
 
-  firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
 
-  // グローバルに公開して app.js から使う
-  window.db = firebase.database();
-  window.firebaseRef = path => firebase.database().ref(path);
-  window.firebaseOnChildAdded = (ref, cb) => ref.on('child_added', cb);
-  window.firebasePush = (ref, val) => ref.push(val);
-</script>
+    /* app.js 互換のグローバル参照（まだ使う場合用） */
+    window.db                   = firebase.database();
+    window.firebaseRef          = path => firebase.database().ref(path);
+    window.firebaseOnChildAdded = (ref, cb) => ref.on('child_added', cb);
+    window.firebasePush         = (ref, val) => ref.push(val);
+  </script>
 
-<!-- アプリ本体 -->
-<script src="app.js" defer></script>
+  <!-- アプリ本体 -->
+  <script src="app.js" defer></script>
 </body>
 </html>
