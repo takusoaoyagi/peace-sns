@@ -47,7 +47,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── ログイン
   loginBtn.addEventListener('click', async () => {
     try {
-      await firebase.auth().signInWithPopup(provider);
+      const result = await firebase.auth().signInWithPopup(provider);
+      const user = result.user;
+      console.log('ログイン成功:', user.displayName);
+
+      // 🔥 ここ追加！ログインしたら名前欄に自動入力
+      const userInputField = document.getElementById('post-user');
+      if (userInputField && user.displayName) {
+        userInputField.value = user.displayName;
+      }
+
       loginBtn.style.display  = 'none';
       logoutBtn.style.display = 'inline-block';
     } catch (e) {
