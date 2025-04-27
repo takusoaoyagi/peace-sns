@@ -1,4 +1,6 @@
-// 0. 本物 AIフィルタ関数
+/* --------------------------------------------------
+   0. AI フィルタ（Cloudflare Worker）
+-------------------------------------------------- */
 async function aiFilter(text) {
   const res = await fetch(
     "https://peace-sns-ai.takusoarts2.workers.dev/",
@@ -12,91 +14,141 @@ async function aiFilter(text) {
   return data.filtered;
 }
 
-// 1. Firebase Realtime Database 参照（1 引数だけ）
-const postsRef = firebaseRef("posts");
+/* --------------------------------------------------
+   1. Firebase Refs（compat API）
+-------------------------------------------------- */
+const postsRef  = firebase.database().ref("posts");
+const usersRef  = firebase.database().ref("users");
 
-// 2. キャラクターと絵文字の対応表
+/* --------------------------------------------------
+   2. キャラ絵文字
+-------------------------------------------------- */
 const charMap = {
-  gal: '👧',
-  ojou: '👸',
-  nerd: '🤓',
-  samurai: '⚔️'
+  gal:     "👧",
+  ojou:    "👸",
+  nerd:    "🤓",
+  samurai: "⚔️"
 };
 
-// 3. 投稿を画面に追加
+/* --------------------------------------------------
+   3. 投稿をタイムラインに追加
+-------------------------------------------------- */
 function addPost(post) {
-  const selectedChar = localStorage.getItem('selectedChar') || 'gal';
-  const displayUser  = `${charMap[selectedChar] || ''}${post.user}`;
-  const timeline     = document.getElementById('timeline');
-  const article      = document.createElement('article');
-  article.className  = 'post';
-  article.innerHTML  = `
-    <h2 class="post-user">${displayUser}</h2>
-    <p class="post-time">${post.time}</p>
-    <p class="post-content">${post.content}</p>
+  const selectedChar = localStorage.getItem("selectedChar") || "gal";
+  const displayUser  = `${charMap[selectedChar] || ""}${post.user}`;
+
+  const tl = document.getElementById("timeline");
+  const card = document.createElement("article");
+  card.className =
+    "post bg-white rounded shadow p-4 flex flex-col gap-1";
+
+  card.innerHTML = `
+    <h2 class="post-user font-bold text-pink-500">${displayUser}</h2>
+    <p  class="post-time text-xs text-gray-400">${post.time}</p>
+    <p  class="post-content mt-1 break-words">${post.content}</p>
   `;
-  timeline.prepend(article);
+  tl.prepend(card);
 }
 
-// 4. ページ読み込み時
-document.addEventListener('DOMContentLoaded', () => {
-  const loginBtn  = document.getElementById('login-button');
-  const logoutBtn = document.getElementById('logout-button');
-  const provider  = new firebase.auth.GoogleAuthProvider();
+/* --------------------------------------------------
+   4. ニックネーム登録モーダル
+-------------------------------------------------- */
+function showNicknameModal() {
+  document.getElementById("nickname-modal").classList.remove("hidden");
+}
+function hideNicknameModal() {
+  document.getElementById("nickname-modal").classList.add("hidden");
+}
 
-  // ── ログイン
-  loginBtn.addEventListener('click', async () => {
+/* --------------------------------------------------
+   5. ページ読み込み
+-------------------------------------------------- */
+document.addEventListener("DOMContentLoaded", () => {
+  /* ボタン / Provider */
+  const loginBtn   = document.getElementById("login-button");
+  const logoutBtn  = document.getElementById("logout-button");
+  const provider   = new firebase.auth.GoogleAuthProvider();
+
+  /* ───── ログイン処理 ───── */
+  loginBtn.addEventListener("click", async () => {
     try {
       const result = await firebase.auth().signInWithPopup(provider);
-      const user = result.user;
-      console.log('ログイン成功:', user.displayName);
+      const user   = result.user;
 
-      // 🔥 ここ追加！ログインしたら名前欄に自動入力
-      const userInputField = document.getElementById('post-user');
-      if (userInputField && user.displayName) {
-        userInputField.value = user.displayName;
+      // 名前欄に Google 表示名
+      const nameField = document.getElementById("post-user");
+      if (nameField && user.displayName) {
+        nameField.value = user.displayName;
       }
 
-      loginBtn.style.display  = 'none';
-      logoutBtn.style.display = 'inline-block';
+      // ニックネーム登録済みか確認
+      usersRef.child(user.uid).once("value", snap => {
+        if (snap.exists()) {
+          // 登録済み → ニックネームをセット
+          const nick = snap.val().nickname;
+          if (nameField) nameField.value = nick;
+        } else {
+          // 未登録 → モーダル表示
+          showNicknameModal();
+        }
+      });
+
+      loginBtn .classList.add("hidden");
+      logoutBtn.classList.remove("hidden");
     } catch (e) {
-      console.error('ログイン失敗', e);
+      console.error("ログイン失敗:", e);
     }
   });
 
-  // ── ログアウト
-  logoutBtn.addEventListener('click', async () => {
+  /* ───── ログアウト処理 ───── */
+  logoutBtn.addEventListener("click", async () => {
     try {
       await firebase.auth().signOut();
-      loginBtn.style.display  = 'inline-block';
-      logoutBtn.style.display = 'none';
+      loginBtn .classList.remove("hidden");
+      logoutBtn.classList.add("hidden");
+      document.getElementById("post-user").value = "";
     } catch (e) {
-      console.error('ログアウト失敗', e);
+      console.error("ログアウト失敗:", e);
     }
   });
 
-  // ── Firebase からリアルタイムで受信
-  firebaseOnChildAdded(postsRef, snap => addPost(snap.val()));
+  /* ───── ニックネーム登録ボタン ───── */
+  document.getElementById("nickname-submit")
+    .addEventListener("click", async () => {
+      const nick = document.getElementById("nickname-input").value.trim();
+      const user = firebase.auth().currentUser;
+      if (!nick || !user) {
+        alert("ニックネームを入力してね！");
+        return;
+      }
+      await usersRef.child(user.uid).set({ nickname: nick });
+      document.getElementById("post-user").value = nick;
+      hideNicknameModal();
+    });
 
-  // ── キャラ選択
-  const charSel   = document.getElementById('char-select');
-  charSel.value   = localStorage.getItem('selectedChar') || 'gal';
-  charSel.addEventListener('change', () =>
-    localStorage.setItem('selectedChar', charSel.value)
+  /* ───── Firebase からリアルタイム受信 ───── */
+  postsRef.on("child_added", snap => addPost(snap.val()));
+
+  /* ───── キャラ選択保存 ───── */
+  const charSel = document.getElementById("char-select");
+  charSel.value = localStorage.getItem("selectedChar") || "gal";
+  charSel.addEventListener("change", () =>
+    localStorage.setItem("selectedChar", charSel.value)
   );
 
-  // ── 投稿送信
-  document.getElementById('post-form').addEventListener('submit', async e => {
-    e.preventDefault();
+  /* ───── 投稿送信 ───── */
+  document.getElementById("post-form")
+    .addEventListener("submit", async e => {
+      e.preventDefault();
+      const user  = document.getElementById("post-user").value || "匿名";
+      const text  = document.getElementById("post-content-input").value;
+      if (!text.trim()) return;
 
-    const userInput    = document.getElementById('post-user').value || '匿名';
-    const contentInput = document.getElementById('post-content-input').value;
-    const filtered     = await aiFilter(contentInput);
+      const filtered = await aiFilter(text);
+      const now = new Date();
+      const ts  = now.toISOString().slice(0,16).replace("T"," ");
 
-    const now = new Date();
-    const ts  = now.toISOString().slice(0,16).replace('T',' ');
-
-    firebasePush(postsRef, { user: userInput, time: ts, content: filtered });
-    e.target.reset();
-  });
+      postsRef.push({ user, time: ts, content: filtered });
+      e.target.reset();
+    });
 });
