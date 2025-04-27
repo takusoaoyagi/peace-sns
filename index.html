@@ -3,15 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <title>Peace SNS MVP</title>
-  <!-- ── ここからスタイル読み込み ── -->
   <link rel="stylesheet" href="styles.css">
-  <!-- ── ここまで ── -->
 </head>
 
 <body>
   <header>
     <h1>ようこそ Peace SNS へ！</h1>
   </header>
+
+  <!-- ログインボタン -->
+  <button id="login-button">Googleでログインする</button>
+
+  <!-- ログアウトボタン（最初は非表示） -->
+  <button id="logout-button" style="display:none;">ログアウトする</button>
 
   <!-- 投稿フォーム -->
   <form id="post-form">
@@ -38,32 +42,37 @@
       </p>
     </article>
   </section>
+
   <hr>
 
-  <!-- ── Firebase 初期化（モジュール＆defer） ── -->
-<script type="module" defer>
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getDatabase, ref, onChildAdded, push } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+  <!-- Firebase SDK読み込み -->
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBaRYrs7n_JoPJtt9rZ01Gl2KQ8DvNhd3k",
-    authDomain: "peace-sns.firebaseapp.com",
-    databaseURL: "https://peace-sns-default-rtdb.firebaseio.com",
-    projectId: "peace-sns",
-    storageBucket: "peace-sns.appspot.com",
-    messagingSenderId: "787581748298",
-    appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
-  };
+  <!-- Firebase 初期化 -->
+  <script type="module" defer>
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getDatabase, ref, onChildAdded, push } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-  const appFB = initializeApp(firebaseConfig);
-  window.db = getDatabase(appFB);
-  window.firebaseRef = ref;
-  window.firebaseOnChildAdded = onChildAdded;
-  window.firebasePush = push;
-</script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBaRYrs7n_JoPJtt9rZ01Gl2KQ8DvNhd3k",
+      authDomain: "peace-sns.firebaseapp.com",
+      databaseURL: "https://peace-sns-default-rtdb.firebaseio.com",
+      projectId: "peace-sns",
+      storageBucket: "peace-sns.appspot.com",
+      messagingSenderId: "787581748298",
+      appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
+    };
 
+    const appFB = initializeApp(firebaseConfig);
+    window.db = getDatabase(appFB);
+    window.firebaseRef = ref;
+    window.firebaseOnChildAdded = onChildAdded;
+    window.firebasePush = push;
+  </script>
 
-  <!-- ── アプリ本体スクリプト ── -->
+  <!-- アプリ本体スクリプト -->
   <script src="app.js" defer></script>
 </body>
 </html>
