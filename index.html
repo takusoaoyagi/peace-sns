@@ -3,15 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Peace SNS MVP</title>
-
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- 任意の追加 CSS -->
-  <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-gray-100">
 
+<body class="bg-gray-100">
   <!-- ヘッダー -->
   <header class="bg-pink-200 p-4 text-center shadow">
     <h1 class="text-2xl font-bold text-pink-700">ようこそ Peace SNS へ！</h1>
@@ -41,16 +36,7 @@
         <button id="reply-cancel" class="text-xs text-red-500 underline">取消</button>
       </div>
 
-      <label class="text-gray-600">キャラ：</label>
-      <select id="char-select" class="border rounded p-2">
-        <option value="gal">ギャル👧</option>
-        <option value="samurai">侍🗡️</option>
-        <option value="ojou">お嬢様👸</option>
-        <option value="nerd">オタク🤓</option>
-      </select>
-
-      <input id="post-user"  type="text" placeholder="あなたの名前"
-             class="border rounded p-2">
+      <!-- 入力は本文だけ -->
       <textarea id="post-content-input" rows="3" placeholder="投稿内容を入力…"
                 class="border rounded p-2"></textarea>
 
@@ -69,7 +55,7 @@
        class="fixed inset-0 bg-black/40 hidden flex items-center justify-center z-50">
     <div class="bg-slate-900 text-white w-[420px] p-4 rounded-lg shadow-lg flex flex-col gap-3">
       <div class="flex justify-between items-center">
-        <span class="font-bold">返信</span>               <!-- ← 文言修正 -->
+        <span class="font-bold">返信</span>
         <button id="popup-close" class="text-xl leading-none">&times;</button>
       </div>
 
@@ -78,7 +64,7 @@
 
       <textarea id="popup-input" rows="4"
                 class="w-full rounded bg-slate-700 p-2 focus:outline-none"
-                placeholder="返信を記入"></textarea>      <!-- ← 文言修正 -->
+                placeholder="返信を記入"></textarea>
 
       <div class="flex justify-end">
         <button id="popup-send"
@@ -91,7 +77,7 @@
 
   <!-- ニックネーム登録モーダル -->
   <div id="nickname-modal"
-       class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+       class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
     <div class="bg-white rounded-lg p-6 w-80 shadow">
       <h2 class="text-lg font-bold mb-4 text-center text-pink-500">ニックネーム登録</h2>
       <input id="nickname-input" type="text" placeholder="ニックネームを入力…"
