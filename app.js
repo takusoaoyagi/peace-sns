@@ -3,7 +3,8 @@
 -------------------------------------------------- */
 async function aiFilter(text) {
   const r = await fetch("https://peace-sns-ai.takusoarts2.workers.dev/", {
-    method: "POST", headers:{ "Content-Type":"application/json" },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text })
   });
   return (await r.json()).filtered;
@@ -12,9 +13,9 @@ async function aiFilter(text) {
 /* --------------------------------------------------
    1. Firebase Refs
 -------------------------------------------------- */
-const db = firebase.database();
-const postsRef = db.ref("posts");
-const usersRef = db.ref("users");
+const db        = firebase.database();
+const postsRef  = db.ref("posts");
+const usersRef  = db.ref("users");
 
 /* --------------------------------------------------
    2. キャラ絵文字
@@ -24,21 +25,21 @@ const charMap = { gal:"👧", ojou:"👸", nerd:"🤓", samurai:"⚔️" };
 /* --------------------------------------------------
    3. タイムライン描画（ツリー型）
 -------------------------------------------------- */
-const nodeMap = new Map();          // id ⇒ DOM 要素
+const nodeMap = new Map();        // id → DOM
 
 function createCard(id, post) {
   const card = document.createElement("article");
-  card.className =
-    "bg-white rounded shadow p-4 flex flex-col gap-1 w-full";
+  card.className = "bg-white rounded shadow p-4 flex flex-col gap-1 w-full";
 
-  /* インデント深さを style で（階層×1.5rem）*/
+  // インデント
   const depth = calcDepth(post.parentId);
   card.style.marginLeft = `${depth * 1.5}rem`;
 
-  const displayUser = `${charMap[localStorage.getItem("selectedChar")||"gal"]||""}${post.user}`;
+  const ch = localStorage.getItem("selectedChar") || "gal";
+  const display = `${charMap[ch] || ""}${post.user}`;
 
   card.innerHTML = `
-    <h2 class="font-bold text-pink-500">${displayUser}</h2>
+    <h2 class="font-bold text-pink-500">${display}</h2>
     <p  class="text-xs text-gray-400">${post.time}</p>
     <p  class="break-words">${post.content}</p>
     <button data-reply="${id}"
@@ -50,41 +51,55 @@ function createCard(id, post) {
   return card;
 }
 
-/* 階層深さを再帰で計算 */
-function calcDepth(pid, d=0){
-  if(!pid) return d;
-  const node = nodeMap.get(pid);
-  return node ? calcDepth(node.dataset.parentId, d+1) : d+1;
+// 再帰的に親をたどって深さ計算
+function calcDepth(pid, d = 0) {
+  if (!pid) return d;
+  const parentNode = nodeMap.get(pid);
+  if (!parentNode) return d + 1;          // まだ DOM が無い場合
+  return calcDepth(parentNode.dataset.parentId, d + 1);
 }
 
-/* 受信時にツリーとして挿入 */
 function addPost(id, post) {
-  const tl = document.getElementById("timeline");
+  const tl   = document.getElementById("timeline");
   const card = createCard(id, post);
   card.dataset.parentId = post.parentId || "";
 
   if (!post.parentId) {
-    tl.prepend(card);                        // ルート投稿
-  } else {
-    const parentEl = nodeMap.get(post.parentId);
-    parentEl?.after(card);                  // 親の直後に挿入
+    tl.prepend(card);                      // ルート投稿
+    return;
   }
+
+  const parentEl = nodeMap.get(post.parentId);
+  if (!parentEl) {
+    tl.prepend(card);                      // 親が未描画なら暫定先頭
+    return;
+  }
+
+  /* -------- 親と同階層の末尾を探してその後ろに差し込む -------- */
+  let insertPos = parentEl;
+  while (
+    insertPos.nextElementSibling &&
+    insertPos.nextElementSibling.style.marginLeft === parentEl.style.marginLeft
+  ) {
+    insertPos = insertPos.nextElementSibling;
+  }
+  insertPos.after(card);
 }
 
 /* --------------------------------------------------
-   4. UI ヘルパ
+   4. リプライ UI
 -------------------------------------------------- */
-const replyInfo  = document.getElementById("reply-info");
-const replyText  = document.getElementById("reply-text");
-const replyCancel= document.getElementById("reply-cancel");
-let   replyToId  = null;
+const replyInfo   = document.getElementById("reply-info");
+const replyText   = document.getElementById("reply-text");
+const replyCancel = document.getElementById("reply-cancel");
+let   replyToId   = null;
 
-function setReplyTarget(id, preview){
+function setReplyTarget(id, preview) {
   replyToId = id;
-  replyText.textContent = `返信先 ▶ ${preview.slice(0,15)}…`;
+  replyText.textContent = `返信 ▶ ${preview.slice(0, 15)}…`;
   replyInfo.classList.remove("hidden");
 }
-function clearReplyTarget(){
+function clearReplyTarget() {
   replyToId = null;
   replyInfo.classList.add("hidden");
 }
@@ -93,42 +108,46 @@ function clearReplyTarget(){
    5. ページ読み込み
 -------------------------------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
-  /* 省略していた既存コード(ログイン/ログアウト/ニックネーム等)は
-     全く変えていません —— 前回の app.js そのままです。*/
+  /* --- 既存のログイン / ログアウト / ニックネーム処理
+         は前回のままなので省略（ここは変更なし） --- */
 
-  /* — タイムラインリアルタイム受信 — */
+  /* --- タイムライン受信 --- */
   postsRef.on("child_added", snap => addPost(snap.key, snap.val()));
 
-  /* — リプライボタン — */
-  document.getElementById("timeline").addEventListener("click", e=>{
+  /* --- リプライボタン（イベントデリゲート） --- */
+  document.getElementById("timeline").addEventListener("click", e => {
     const btn = e.target.closest("button[data-reply]");
-    if(!btn) return;
-    const targetId   = btn.dataset.reply;
-    const previewTxt = btn.parentNode.querySelector("p").textContent;
-    setReplyTarget(targetId, previewTxt);
+    if (!btn) return;
+    const id  = btn.dataset.reply;
+    const txt = btn.parentNode.querySelector("p").textContent;
+    setReplyTarget(id, txt);
     document.getElementById("post-content-input").focus();
   });
 
-  /* — リプライ取消ボタン — */
+  /* --- リプライ取消 --- */
   replyCancel.addEventListener("click", clearReplyTarget);
 
-  /* — 送信処理 (元コード+replyToId) — */
-  document.getElementById("post-form").addEventListener("submit", async e=>{
+  /* --- 投稿送信 --- */
+  document.getElementById("post-form").addEventListener("submit", async e => {
     e.preventDefault();
-    const cur = firebase.auth().currentUser;
-    if(!cur) return alert("ログインしないと投稿できないよ！");
 
-    const content = document.getElementById("post-content-input").value.trim();
-    if(!content) return;
-    const filtered = await aiFilter(content);
-    const ts = new Date().toISOString().slice(0,16).replace("T"," ");
+    if (!firebase.auth().currentUser) {
+      alert("ログインしないと投稿できないよ！");
+      return;
+    }
+
+    const user   = document.getElementById("post-user").value || "匿名";
+    const text   = document.getElementById("post-content-input").value.trim();
+    if (!text) return;
+
+    const filtered = await aiFilter(text);
+    const ts       = new Date().toISOString().slice(0, 16).replace("T", " ");
 
     await postsRef.push({
-      user: document.getElementById("post-user").value || "匿名",
-      time: ts,
-      content: filtered,
+      user, time: ts, content: filtered,
       parentId: replyToId || null
     });
+
     e.target.reset();
     clearReplyTarget();
   });
