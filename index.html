@@ -3,11 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <title>Peace SNS MVP</title>
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 任意の追加 CSS -->
   <link rel="stylesheet" href="styles.css">
 </head>
-
 <body class="bg-gray-100">
+
   <!-- ヘッダー -->
   <header class="bg-pink-200 p-4 text-center shadow">
     <h1 class="text-2xl font-bold text-pink-700">ようこそ Peace SNS へ！</h1>
@@ -25,11 +29,12 @@
     </button>
   </div>
 
-  <!-- 投稿フォーム（ログイン後に表示） -->
+  <!-- 投稿フォーム（ログイン後だけ表示） -->
   <div id="post-form-wrapper" class="hidden">
     <form id="post-form"
           class="flex flex-col gap-2 p-4 bg-white rounded shadow max-w-md mx-auto mt-6">
-      <!-- 返信先プレビュー -->
+
+      <!-- 返信プレビュー -->
       <div id="reply-info"
            class="hidden text-sm text-blue-500 flex items-center justify-between">
         <span id="reply-text"></span>
@@ -38,15 +43,14 @@
 
       <label class="text-gray-600">キャラ：</label>
       <select id="char-select" class="border rounded p-2">
-        <option value="gal"    >ギャル👧</option>
+        <option value="gal">ギャル👧</option>
         <option value="samurai">侍🗡️</option>
-        <option value="ojou"   >お嬢様👸</option>
-        <option value="nerd"   >オタク🤓</option>
+        <option value="ojou">お嬢様👸</option>
+        <option value="nerd">オタク🤓</option>
       </select>
 
-      <input id="post-user" type="text" placeholder="あなたの名前"
+      <input id="post-user"  type="text" placeholder="あなたの名前"
              class="border rounded p-2">
-
       <textarea id="post-content-input" rows="3" placeholder="投稿内容を入力…"
                 class="border rounded p-2"></textarea>
 
@@ -60,25 +64,28 @@
   <section id="timeline"
            class="flex flex-col gap-4 p-4 max-w-xl mx-auto mt-6"></section>
 
-  <!-- ★ 返信ポップアップ（ツイッター風 “下書き”） -->
+  <!-- 返信ポップアップ -->
   <div id="reply-popup"
        class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-    <div class="bg-slate-900 text-white w-[420px] p-4 rounded-lg shadow-lg">
-      <div class="flex justify-between items-center mb-2">
-        <span class="font-bold">下書き</span>
+    <div class="bg-slate-900 text-white w-[420px] p-4 rounded-lg shadow-lg flex flex-col gap-3">
+      <div class="flex justify-between items-center">
+        <span class="font-bold">返信</span>               <!-- ← 文言修正 -->
         <button id="popup-close" class="text-xl leading-none">&times;</button>
       </div>
+
       <div id="popup-parent"
-           class="border-l-4 border-gray-500 pl-3 text-sm text-gray-300 mb-3"></div>
+           class="border-l-4 border-gray-500 pl-3 text-sm text-gray-300"></div>
 
       <textarea id="popup-input" rows="4"
-                class="w-full rounded bg-slate-700 p-2 text-white focus:outline-none"
-                placeholder="別のポストを追加"></textarea>
+                class="w-full rounded bg-slate-700 p-2 focus:outline-none"
+                placeholder="返信を記入"></textarea>      <!-- ← 文言修正 -->
 
-      <button id="popup-send"
-              class="bg-pink-500 hover:bg-pink-600 text-white rounded px-4 py-2 float-right mt-3">
-        ポストする
-      </button>
+      <div class="flex justify-end">
+        <button id="popup-send"
+                class="bg-pink-500 hover:bg-pink-600 text-white rounded px-4 py-2">
+          ポストする
+        </button>
+      </div>
     </div>
   </div>
 
@@ -96,11 +103,12 @@
     </div>
   </div>
 
-  <!-- Firebase（compat） -->
+  <!-- Firebase compat -->
   <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database-compat.js"></script>
 
+  <!-- Firebase 初期化 -->
   <script>
     firebase.initializeApp({
       apiKey            : "AIzaSyBaRYrs7n_JoPJtt9rZ01Gl2KQ8DvNhd3k",
