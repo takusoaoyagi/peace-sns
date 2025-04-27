@@ -13,7 +13,7 @@ async function aiFilter(text) {
 }
 
 // 1. Firebase Realtime Database 参照
-const postsRef = firebaseRef(db, "posts");
+const postsRef = firebaseRef("posts");
 
 // 2. キャラクターと絵文字の対応表
 const charMap = {
