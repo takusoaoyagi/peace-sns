@@ -3,9 +3,9 @@
 -------------------------------------------------- */
 async function aiFilter(text) {
   const r = await fetch("https://peace-sns-ai.takusoarts2.workers.dev/", {
-    method: "POST",
+    method : "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text })
+    body   : JSON.stringify({ text })
   });
   return (await r.json()).filtered;
 }
@@ -25,18 +25,17 @@ const charMap = { gal:"👧", ojou:"👸", nerd:"🤓", samurai:"⚔️" };
 /* --------------------------------------------------
    3. タイムライン描画（ツリー型）
 -------------------------------------------------- */
-const nodeMap = new Map();        // id → DOM
+const nodeMap = new Map();                      // id → DOM
 
 function createCard(id, post) {
   const card = document.createElement("article");
   card.className = "bg-white rounded shadow p-4 flex flex-col gap-1 w-full";
 
-  // インデント
+  /* インデント */
   const depth = calcDepth(post.parentId);
   card.style.marginLeft = `${depth * 1.5}rem`;
 
-  const ch = localStorage.getItem("selectedChar") || "gal";
-  const display = `${charMap[ch] || ""}${post.user}`;
+  const display = `${charMap[localStorage.getItem("selectedChar") || "gal"] || ""}${post.user}`;
 
   card.innerHTML = `
     <h2 class="font-bold text-pink-500">${display}</h2>
@@ -47,35 +46,32 @@ function createCard(id, post) {
       リプライ
     </button>
   `;
+  card.dataset.parentId = post.parentId || "";
   nodeMap.set(id, card);
   return card;
 }
 
-// 再帰的に親をたどって深さ計算
 function calcDepth(pid, d = 0) {
   if (!pid) return d;
-  const parentNode = nodeMap.get(pid);
-  if (!parentNode) return d + 1;          // まだ DOM が無い場合
-  return calcDepth(parentNode.dataset.parentId, d + 1);
+  const pNode = nodeMap.get(pid);
+  return pNode ? calcDepth(pNode.dataset.parentId, d + 1) : d + 1;
 }
 
 function addPost(id, post) {
   const tl   = document.getElementById("timeline");
   const card = createCard(id, post);
-  card.dataset.parentId = post.parentId || "";
 
   if (!post.parentId) {
-    tl.prepend(card);                      // ルート投稿
+    tl.prepend(card);                                    // ルート投稿
     return;
   }
 
+  /* 親の直後の “同じ深さ最後尾” を探して挿入 */
   const parentEl = nodeMap.get(post.parentId);
   if (!parentEl) {
-    tl.prepend(card);                      // 親が未描画なら暫定先頭
+    tl.prepend(card);                                    // 親未描画なら先頭へ
     return;
   }
-
-  /* -------- 親と同階層の末尾を探してその後ろに差し込む -------- */
   let insertPos = parentEl;
   while (
     insertPos.nextElementSibling &&
@@ -108,13 +104,69 @@ function clearReplyTarget() {
    5. ページ読み込み
 -------------------------------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
-  /* --- 既存のログイン / ログアウト / ニックネーム処理
-         は前回のままなので省略（ここは変更なし） --- */
+  /* ---------- ログイン／ログアウト ---------- */
+  const loginBtn   = document.getElementById("login-button");
+  const logoutBtn  = document.getElementById("logout-button");
+  const formWrap   = document.getElementById("post-form-wrapper");
+  const nameField  = document.getElementById("post-user");
+  const provider   = new firebase.auth.GoogleAuthProvider();
 
-  /* --- タイムライン受信 --- */
+  // ログイン
+  loginBtn.addEventListener("click", async () => {
+    try {
+      const { user } = await firebase.auth().signInWithPopup(provider);
+      console.log("ログイン成功:", user.displayName);
+
+      /* Google 表示名 → 名前欄（編集禁止） */
+      if (user.displayName) {
+        nameField.value    = user.displayName;
+        nameField.readOnly = true;
+      }
+
+      /* 既にニックネーム登録済み？ */
+      usersRef.child(user.uid).once("value", snap => {
+        if (snap.exists()) {
+          nameField.value = snap.val().nickname;
+        } else {
+          document.getElementById("nickname-modal").classList.remove("hidden");
+        }
+      });
+
+      loginBtn.classList.add("hidden");
+      logoutBtn.classList.remove("hidden");
+      formWrap.style.display = "block";
+    } catch (err) {
+      console.error("ログイン失敗:", err);
+      /* ブラウザがポップアップをブロックしている可能性あり */
+      alert("ポップアップがブロックされていないか確認してください。");
+    }
+  });
+
+  // ログアウト
+  logoutBtn.addEventListener("click", async () => {
+    await firebase.auth().signOut();
+    loginBtn.classList.remove("hidden");
+    logoutBtn.classList.add("hidden");
+    formWrap.style.display = "none";
+    nameField.value = "";
+    nameField.readOnly = false;
+  });
+
+  /* ニックネーム登録モーダル */
+  document.getElementById("nickname-submit").addEventListener("click", async () => {
+    const nick = document.getElementById("nickname-input").value.trim();
+    const user = firebase.auth().currentUser;
+    if (!nick || !user) return;
+
+    await usersRef.child(user.uid).set({ nickname: nick });
+    nameField.value    = nick;
+    nameField.readOnly = true;
+    document.getElementById("nickname-modal").classList.add("hidden");
+  });
+
+  /* ---------- タイムライン ---------- */
   postsRef.on("child_added", snap => addPost(snap.key, snap.val()));
 
-  /* --- リプライボタン（イベントデリゲート） --- */
   document.getElementById("timeline").addEventListener("click", e => {
     const btn = e.target.closest("button[data-reply]");
     if (!btn) return;
@@ -124,31 +176,34 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("post-content-input").focus();
   });
 
-  /* --- リプライ取消 --- */
   replyCancel.addEventListener("click", clearReplyTarget);
 
-  /* --- 投稿送信 --- */
+  /* ---------- 投稿送信 ---------- */
   document.getElementById("post-form").addEventListener("submit", async e => {
     e.preventDefault();
+    if (!firebase.auth().currentUser) return alert("ログイン後に投稿できます");
 
-    if (!firebase.auth().currentUser) {
-      alert("ログインしないと投稿できないよ！");
-      return;
-    }
-
-    const user   = document.getElementById("post-user").value || "匿名";
-    const text   = document.getElementById("post-content-input").value.trim();
+    const text = document.getElementById("post-content-input").value.trim();
     if (!text) return;
 
     const filtered = await aiFilter(text);
-    const ts       = new Date().toISOString().slice(0, 16).replace("T", " ");
+    const ts = new Date().toISOString().slice(0, 16).replace("T", " ");
 
     await postsRef.push({
-      user, time: ts, content: filtered,
+      user    : nameField.value || "匿名",
+      time    : ts,
+      content : filtered,
       parentId: replyToId || null
     });
 
     e.target.reset();
     clearReplyTarget();
   });
+
+  /* ---------- キャラ選択保持 ---------- */
+  const charSel = document.getElementById("char-select");
+  charSel.value = localStorage.getItem("selectedChar") || "gal";
+  charSel.addEventListener("change", () =>
+    localStorage.setItem("selectedChar", charSel.value)
+  );
 });
