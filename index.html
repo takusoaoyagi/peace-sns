@@ -37,7 +37,15 @@
           class="flex flex-col gap-2 p-4 bg-white rounded shadow max-w-md mx-auto mt-6">
 
       <!-- ▶ 返信中表示エリア（リプライ機能用） -->
-      <div id="reply-info" class="hidden text-sm text-blue-500 text-center"></div>
+<!-- 新 ― 取消ボタン付き -->
+<div id="reply-info"
+     class="hidden text-sm text-blue-500 text-center flex items-center justify-center gap-2">
+  <span id="reply-text"></span>
+  <button id="reply-cancel"
+          class="text-xs text-red-500 underline hover:no-underline">
+    取消
+  </button>
+</div>
 
       <label for="char-select" class="text-gray-600">キャラ：</label>
       <select id="char-select" class="border rounded p-2">
