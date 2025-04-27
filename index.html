@@ -42,7 +42,19 @@
   <!-- タイムライン（最初は空でも OK）-->
   <section id="timeline"></section>
   <hr>
-
+  
+<!-- ニックネーム登録モーダル -->
+<div id="nickname-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+  <div class="bg-white rounded-lg p-6 w-80 shadow">
+    <h2 class="text-lg font-bold mb-4 text-center text-pink-500">ニックネーム登録</h2>
+    <input type="text" id="nickname-input" placeholder="ニックネームを入力…" class="border rounded w-full p-2 mb-4">
+    <div class="flex justify-center">
+      <button id="nickname-submit" class="bg-pink-400 text-white rounded px-4 py-2 hover:bg-pink-500">
+        登録する
+      </button>
+    </div>
+  </div>
+</div>
   <!-- Firebase SDK（compat 版だけ！）-->
   <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
