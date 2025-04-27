@@ -40,6 +40,34 @@ function addPost(post, save = true) {
 
 // 4. ページ読み込み時の処理
 document.addEventListener('DOMContentLoaded', () => {
+  const loginButton = document.getElementById('login-button');
+  const logoutButton = document.getElementById('logout-button');
+  const provider = new firebase.auth.GoogleAuthProvider();
+
+  // ログイン処理
+  loginButton.addEventListener('click', async () => {
+    try {
+      const result = await firebase.auth().signInWithPopup(provider);
+      const user = result.user;
+      console.log("ログイン成功:", user.displayName);
+      loginButton.style.display = "none";
+      logoutButton.style.display = "inline-block";
+    } catch (error) {
+      console.error("ログイン失敗:", error);
+    }
+  });
+
+  // ログアウト処理
+  logoutButton.addEventListener('click', async () => {
+    try {
+      await firebase.auth().signOut();
+      console.log("ログアウト成功");
+      loginButton.style.display = "inline-block";
+      logoutButton.style.display = "none";
+    } catch (error) {
+      console.error("ログアウト失敗:", error);
+    }
+  });
 
   // Firebase からリアルタイムで投稿を受け取る
   firebaseOnChildAdded(postsRef, (snapshot) => {
