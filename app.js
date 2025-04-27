@@ -17,16 +17,16 @@ async function aiFilter(text) {
 /* --------------------------------------------------
    1. Firebase Refs（compat API）
 -------------------------------------------------- */
-const postsRef  = firebase.database().ref("posts");
-const usersRef  = firebase.database().ref("users");
+const postsRef = firebase.database().ref("posts");
+const usersRef = firebase.database().ref("users");
 
 /* --------------------------------------------------
    2. キャラ絵文字
 -------------------------------------------------- */
 const charMap = {
-  gal:     "👧",
-  ojou:    "👸",
-  nerd:    "🤓",
+  gal: "👧",
+  ojou: "👸",
+  nerd: "🤓",
   samurai: "⚔️"
 };
 
@@ -35,7 +35,7 @@ const charMap = {
 -------------------------------------------------- */
 function addPost(post) {
   const selectedChar = localStorage.getItem("selectedChar") || "gal";
-  const displayUser  = `${charMap[selectedChar] || ""}${post.user}`;
+  const displayUser = `${charMap[selectedChar] || ""}${post.user}`;
 
   const tl = document.getElementById("timeline");
   const card = document.createElement("article");
@@ -65,35 +65,35 @@ function hideNicknameModal() {
 -------------------------------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
   /* ボタン / Provider */
-  const loginBtn   = document.getElementById("login-button");
-  const logoutBtn  = document.getElementById("logout-button");
-  const provider   = new firebase.auth.GoogleAuthProvider();
+  const loginBtn = document.getElementById("login-button");
+  const logoutBtn = document.getElementById("logout-button");
+  const provider = new firebase.auth.GoogleAuthProvider();
+  const nameField = document.getElementById("post-user");
 
   /* ───── ログイン処理 ───── */
   loginBtn.addEventListener("click", async () => {
     try {
       const result = await firebase.auth().signInWithPopup(provider);
-      const user   = result.user;
+      const user = result.user;
+      console.log("ログイン成功:", user.displayName);
 
       // 名前欄に Google 表示名
-      const nameField = document.getElementById("post-user");
       if (nameField && user.displayName) {
         nameField.value = user.displayName;
+        nameField.readOnly = true; // 🔥 ここ追加！編集禁止！
       }
 
       // ニックネーム登録済みか確認
       usersRef.child(user.uid).once("value", snap => {
         if (snap.exists()) {
-          // 登録済み → ニックネームをセット
           const nick = snap.val().nickname;
           if (nameField) nameField.value = nick;
         } else {
-          // 未登録 → モーダル表示
           showNicknameModal();
         }
       });
 
-      loginBtn .classList.add("hidden");
+      loginBtn.classList.add("hidden");
       logoutBtn.classList.remove("hidden");
     } catch (e) {
       console.error("ログイン失敗:", e);
@@ -104,9 +104,12 @@ document.addEventListener("DOMContentLoaded", () => {
   logoutBtn.addEventListener("click", async () => {
     try {
       await firebase.auth().signOut();
-      loginBtn .classList.remove("hidden");
+      loginBtn.classList.remove("hidden");
       logoutBtn.classList.add("hidden");
-      document.getElementById("post-user").value = "";
+      if (nameField) {
+        nameField.value = "";
+        nameField.readOnly = false;
+      }
     } catch (e) {
       console.error("ログアウト失敗:", e);
     }
@@ -115,15 +118,27 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ───── ニックネーム登録ボタン ───── */
   document.getElementById("nickname-submit")
     .addEventListener("click", async () => {
-      const nick = document.getElementById("nickname-input").value.trim();
+      const nicknameInput = document.getElementById("nickname-input");
+      const nickname = nicknameInput.value.trim();
       const user = firebase.auth().currentUser;
-      if (!nick || !user) {
+
+      if (!nickname || !user) {
         alert("ニックネームを入力してね！");
         return;
       }
-      await usersRef.child(user.uid).set({ nickname: nick });
-      document.getElementById("post-user").value = nick;
+
+      await usersRef.child(user.uid).set({ nickname });
+
+      if (nameField) {
+        nameField.value = nickname;
+        nameField.readOnly = true; // 🔥 ここもreadonlyに！
+      }
+
       hideNicknameModal();
+
+      // 🔥 モーダル閉じたあとログアウトボタンも確実に表示
+      loginBtn.classList.add("hidden");
+      logoutBtn.classList.remove("hidden");
     });
 
   /* ───── Firebase からリアルタイム受信 ───── */
@@ -140,13 +155,20 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("post-form")
     .addEventListener("submit", async e => {
       e.preventDefault();
-      const user  = document.getElementById("post-user").value || "匿名";
-      const text  = document.getElementById("post-content-input").value;
+
+      const currentUser = firebase.auth().currentUser;
+      if (!currentUser) {
+        alert("ログインしないと投稿できないよ！");
+        return;
+      }
+
+      const user = document.getElementById("post-user").value || "匿名";
+      const text = document.getElementById("post-content-input").value;
       if (!text.trim()) return;
 
       const filtered = await aiFilter(text);
       const now = new Date();
-      const ts  = now.toISOString().slice(0,16).replace("T"," ");
+      const ts = now.toISOString().slice(0, 16).replace("T", " ");
 
       postsRef.push({ user, time: ts, content: filtered });
       e.target.reset();
