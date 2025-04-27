@@ -7,14 +7,10 @@
 </head>
 
 <body>
-  <header>
-    <h1>ようこそ Peace SNS へ！</h1>
-  </header>
+  <header><h1>ようこそ Peace SNS へ！</h1></header>
 
-  <!-- ログインボタン -->
+  <!-- ログイン／ログアウト -->
   <button id="login-button">Googleでログインする</button>
-
-  <!-- ログアウトボタン（最初は非表示） -->
   <button id="logout-button" style="display:none;">ログアウトする</button>
 
   <!-- 投稿フォーム -->
@@ -31,25 +27,15 @@
     <button type="submit">投稿する</button>
   </form>
 
-  <!-- タイムライン -->
-  <section id="timeline">
-    <article class="post">
-      <h2 class="post-user">👧 高校生ギャルちゃん</h2>
-      <p class="post-time">2025-04-27 15:00</p>
-      <p class="post-content">
-        マジ最高の1日だったんだけど〜🌈💖  
-        みんなも今日のハッピー教えてほしいな〜！
-      </p>
-    </article>
-  </section>
-
+  <!-- タイムライン（最初は空でも OK）-->
+  <section id="timeline"></section>
   <hr>
 
-<!-- Firebase SDK読み込み（compat版！！） -->
-<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
-  
+  <!-- Firebase SDK（compat 版だけ！）-->
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database-compat.js"></script>
+
   <!-- Firebase 初期化 -->
   <script>
     const firebaseConfig = {
@@ -62,17 +48,16 @@
       appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
     };
 
-    // Firebase 初期化
-    const appFB = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
 
-    // データベースをグローバル公開
-    window.db = firebase.database();
-    window.firebaseRef = firebase.database().ref;
-    window.firebaseOnChildAdded = (ref, callback) => ref.on('child_added', callback);
-    window.firebasePush = (ref, value) => ref.push(value);
+    // グローバルに公開して app.js から使う
+    window.db                 = firebase.database();
+    window.firebaseRef        = path => firebase.database().ref(path);
+    window.firebaseOnChildAdded = (ref, cb) => ref.on('child_added', cb);
+    window.firebasePush       = (ref, val) => ref.push(val);
   </script>
 
-  <!-- アプリ本体スクリプト -->
+  <!-- アプリ本体 -->
   <script src="app.js" defer></script>
 </body>
 </html>
