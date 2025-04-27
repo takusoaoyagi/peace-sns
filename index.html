@@ -8,25 +8,32 @@
 </head>
 
 <body>
-  <header><h1>ようこそ Peace SNS へ！</h1></header>
+<header class="bg-pink-200 p-4 text-center shadow">
+  <h1 class="text-2xl font-bold text-pink-700">ようこそ Peace SNS へ！</h1>
+</header>
 
   <!-- ログイン／ログアウト -->
-  <button id="login-button">Googleでログインする</button>
-  <button id="logout-button" style="display:none;">ログアウトする</button>
+<button id="login-button" class="bg-green-400 hover:bg-green-500 text-white rounded p-2 m-2">
+  Googleでログインする
+</button>
+
+<button id="logout-button" style="display:none;" class="bg-gray-400 hover:bg-gray-500 text-white rounded p-2 m-2">
+  ログアウトする
+</button>
 
   <!-- 投稿フォーム -->
-  <form id="post-form">
-    <label for="char-select">キャラ：</label>
-    <select id="char-select">
-      <option value="gal">ギャル👧</option>
-      <option value="samurai">侍🗡️</option>
-      <option value="ojou">お嬢様👸</option>
-      <option value="nerd">オタク🤓</option>
-    </select>
-    <input type="text" id="post-user" placeholder="あなたの名前" required>
-    <textarea id="post-content-input" placeholder="投稿内容を入力…" rows="3" required></textarea>
-    <button type="submit">投稿する</button>
-  </form>
+<form id="post-form" class="flex flex-col gap-2 p-4 bg-white rounded shadow max-w-md mx-auto mt-4">
+  <label for="char-select" class="text-gray-600">キャラ：</label>
+  <select id="char-select" class="border rounded p-2">
+    <option value="gal">ギャル👧</option>
+    <option value="samurai">侍🗡️</option>
+    <option value="ojou">お嬢様👸</option>
+    <option value="nerd">オタク🤓</option>
+  </select>
+  <input type="text" id="post-user" placeholder="あなたの名前" class="border rounded p-2">
+  <textarea id="post-content-input" placeholder="投稿内容を入力…" rows="3" class="border rounded p-2"></textarea>
+  <button type="submit" class="bg-pink-400 text-white rounded p-2 hover:bg-pink-500">投稿する</button>
+</form>
 
   <!-- タイムライン（最初は空でも OK）-->
   <section id="timeline"></section>
