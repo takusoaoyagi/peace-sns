@@ -44,8 +44,8 @@ function addPost(post) {
 
   card.innerHTML = `
     <h2 class="post-user font-bold text-pink-500">${displayUser}</h2>
-    <p  class="post-time text-xs text-gray-400">${post.time}</p>
-    <p  class="post-content mt-1 break-words">${post.content}</p>
+    <p class="post-time text-xs text-gray-400">${post.time}</p>
+    <p class="post-content mt-1 break-words">${post.content}</p>
   `;
   tl.prepend(card);
 }
@@ -61,14 +61,14 @@ function hideNicknameModal() {
 }
 
 /* --------------------------------------------------
-   5. ページ読み込み
+   5. ページ読み込み時の処理
 -------------------------------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
-  /* ボタン / Provider */
   const loginBtn = document.getElementById("login-button");
   const logoutBtn = document.getElementById("logout-button");
   const provider = new firebase.auth.GoogleAuthProvider();
   const nameField = document.getElementById("post-user");
+  const formWrapper = document.getElementById("post-form-wrapper");
 
   /* ───── ログイン処理 ───── */
   loginBtn.addEventListener("click", async () => {
@@ -77,10 +77,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const user = result.user;
       console.log("ログイン成功:", user.displayName);
 
-      // 名前欄に Google 表示名
+      // 名前欄にGoogle表示名（編集禁止）
       if (nameField && user.displayName) {
         nameField.value = user.displayName;
-        nameField.readOnly = true; // 🔥 ここ追加！編集禁止！
+        nameField.readOnly = true;
       }
 
       // ニックネーム登録済みか確認
@@ -93,8 +93,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
+      // ボタン表示切替＋フォーム表示
       loginBtn.classList.add("hidden");
       logoutBtn.classList.remove("hidden");
+      formWrapper.style.display = 'block'; // 🔥フォーム表示！
+
     } catch (e) {
       console.error("ログイン失敗:", e);
     }
@@ -104,12 +107,18 @@ document.addEventListener("DOMContentLoaded", () => {
   logoutBtn.addEventListener("click", async () => {
     try {
       await firebase.auth().signOut();
+
+      // ボタン表示切替＋フォーム非表示
       loginBtn.classList.remove("hidden");
       logoutBtn.classList.add("hidden");
+      formWrapper.style.display = 'none'; // 🔥フォーム非表示！
+
+      // 名前欄クリア＆編集可能
       if (nameField) {
         nameField.value = "";
         nameField.readOnly = false;
       }
+
     } catch (e) {
       console.error("ログアウト失敗:", e);
     }
@@ -131,17 +140,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (nameField) {
         nameField.value = nickname;
-        nameField.readOnly = true; // 🔥 ここもreadonlyに！
+        nameField.readOnly = true;
       }
 
       hideNicknameModal();
 
-      // 🔥 モーダル閉じたあとログアウトボタンも確実に表示
       loginBtn.classList.add("hidden");
       logoutBtn.classList.remove("hidden");
+      formWrapper.style.display = 'block'; // 🔥念のためフォーム表示
+
     });
 
-  /* ───── Firebase からリアルタイム受信 ───── */
+  /* ───── Firebaseからリアルタイム受信 ───── */
   postsRef.on("child_added", snap => addPost(snap.val()));
 
   /* ───── キャラ選択保存 ───── */
