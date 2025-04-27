@@ -51,10 +51,7 @@
   <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
 
   <!-- Firebase 初期化 -->
-  <script type="module" defer>
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getDatabase, ref, onChildAdded, push } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBaRYrs7n_JoPJtt9rZ01Gl2KQ8DvNhd3k",
       authDomain: "peace-sns.firebaseapp.com",
@@ -65,11 +62,14 @@
       appId: "1:787581748298:web:ce4c00c58cb0de341952b3"
     };
 
-    const appFB = initializeApp(firebaseConfig);
-    window.db = getDatabase(appFB);
-    window.firebaseRef = ref;
-    window.firebaseOnChildAdded = onChildAdded;
-    window.firebasePush = push;
+    // Firebase 初期化
+    const appFB = firebase.initializeApp(firebaseConfig);
+
+    // データベースをグローバル公開
+    window.db = firebase.database();
+    window.firebaseRef = firebase.database().ref;
+    window.firebaseOnChildAdded = (ref, callback) => ref.on('child_added', callback);
+    window.firebasePush = (ref, value) => ref.push(value);
   </script>
 
   <!-- アプリ本体スクリプト -->
